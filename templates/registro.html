@@ -1,0 +1,91 @@
+<!-- el siguiente codigo define la estructura de la página de registro -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuario | Sistema</title>
+    <!-- Importación de la fuente Poppins desde Google Fonts para un diseño moderno y limpio -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #121212; 
+            color: white; 
+            font-family: 'Poppins', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 15px; 
+        }
+        
+        .card-registro { 
+            background: #1e1e1e; 
+            padding: 30px; 
+            border-radius: 15px; 
+            border: 1px solid #D4AF37; 
+            width: 100%; 
+            max-width: 400px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+        }
+    
+        .menu-top { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; gap: 5px; }
+        
+        .btn-menu { background: none; border: 1px solid #D4AF37; color: #D4AF37; padding: 5px 15px; cursor: pointer; border-radius: 5px; font-weight: 600; transition: 0.3s; }
+        
+        .btn-menu:hover { background: #D4AF37; color: black; }
+        
+        input { 
+            width: 100%; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            border: 1px solid #333; 
+            background: #2a2a2a; 
+            color: white; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+        }
+        
+        label { font-size: 0.9rem; color: #D4AF37; }
+
+        
+        @media (max-width: 400px) {
+            .card-registro { padding: 20px; }
+            .btn-menu { padding: 5px 8px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Menú superior -->
+    <div class="card-registro">
+        <div class="menu-top">
+            <a href="/" style="text-decoration: none;"> 
+                <!-- El botón de inicio redirige a la página principal del sistema -->               
+                <button class="btn-menu">🏠 Inicio</button> 
+            </a>
+            <!-- El botón de agregar podría abrir un modal o una nueva sección para agregar más información, aunque en este caso no tiene funcionalidad específica -->
+            <button class="btn-menu">+ Agregar</button>
+            <button type="submit" form="regForm" class="btn-menu">💾 Guardar</button>
+        </div>
+         
+        <form id="regForm" action="/guardar" method="POST">
+            <label>Nombre y Apellido</label>
+            <input type="text" name="nombre" required>
+            
+            <label>Cédula</label>
+            <input type="text" name="cedula" required>
+            
+            <label>Teléfono</label>
+            <input type="text" name="telefono">
+            
+            <label>Fecha de Nacimiento</label>
+            <input type="date" name="fecha_nac">
+            
+            <label>Correo Electrónico</label>
+            <input type="email" name="correo" required>
+        </form>
+    </div>
+</body>
+</html>

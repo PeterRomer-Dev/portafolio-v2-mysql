@@ -1,0 +1,204 @@
+:root {
+    --negro-fondo: #0a0a0a;
+    --negro-card: #141414;
+    --dorado: linear-gradient(45deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+    --dorado-solido: #d4af37;
+    --texto-gris: #a0a0a0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--negro-fondo);
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    /* Eliminamos display: flex, justify-content y align-items */
+    display: block; 
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 800px;
+    width: 100%;
+    text-align: center;
+}
+
+header {
+    margin-bottom: 40px;
+    animation: fadeIn 1.5s ease-in-out;
+}
+
+.profile-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 3px solid var(--dorado-solido);
+    object-fit: cover;
+    margin-bottom: 20px;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.profile-img:hover {
+    transform: scale(1.05);
+}
+
+h1 {
+    font-size: 2.5rem;
+    background: var(--dorado);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    color: var(--texto-gris);
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.card {
+    background: var(--negro-card);
+    padding: 30px;
+    border-radius: 15px;
+    /* Borde inicial sutil */
+    border: 1px solid rgba(212, 175, 55, 0.2); 
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    /* Transición para el efecto de movimiento */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: default;
+}
+
+/* Efecto al pasar el mouse */
+.card:hover {
+    /* Resalta el borde con el dorado sólido */
+    border-color: var(--dorado-solido); 
+    /* Eleva el recuadro y lo inclina ligeramente */
+    transform: translateY(-10px) scale(1.02); 
+    /* Sombra más profunda para dar sensación de altura */
+    box-shadow: 0 20px 40px rgba(212, 175, 55, 0.2); 
+}
+
+.card h3 {
+    color: var(--dorado-solido);
+    margin-bottom: 15px;
+}
+
+.skills {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 40px;
+}
+
+.skill-tag {
+    border: 1px solid var(--dorado-solido);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: var(--dorado-solido);
+    transition: all 0.3s;
+}
+
+.skill-tag:hover {
+    background: var(--dorado);
+    color: black;
+    font-weight: bold;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 30px;
+    margin: 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn.primary {
+    background: var(--dorado);
+    color: black;
+}
+
+.btn.secondary {
+    border: 1px solid var(--dorado-solido);
+    color: var(--dorado-solido);
+}
+
+.btn:hover {
+    opacity: 0.8;
+    transform: translateY(-3px);
+}
+
+/* Animación simple */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Ajustes para teléfonos */
+@media (max-width: 768px) {
+    .sidebar-image {
+        display: none !important;
+    }
+
+    .main-layout {
+        margin: 20px auto; /* Reducimos el margen superior en móvil */
+        padding: 0 15px;   /* Añadimos un poco de aire a los lados */
+    }
+
+    .container {
+        flex: 1; /* Permite que el contenido principal ocupe todo el ancho */
+    }
+}
+
+.contact-section {    
+    width: 100%;
+    clear: both; /* Fuerza a bajar si hay elementos flotados */
+    background-color: white;
+    padding: 20px 0;
+    margin-top: 50px;
+    text-align: center;
+    color: black;
+}
+
+.contact-section h2 {
+  font-size: 1.4rem; /* Un poco más pequeña para ahorrar espacio */
+    font-weight: 600;
+    margin-bottom: 5px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.contact-section p {
+    font-size: 1rem;
+    margin: 2px 0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); 
+}
+
+/* 1. Ajuste para que la imagen suba al tope */
+.main-layout {
+    display: flex;
+    max-width: 1200px;
+    margin: 40px auto;
+    gap: 20px;
+    align-items: flex-start; /* Cambiado de 'center' a 'flex-start' para subir la imagen */
+}
+
+.copyright {
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: #555; /* Un gris oscuro para que sea sutil sobre el fondo blanco */
+    border-top: 1px solid #eee; /* Una línea divisoria muy tenue */
+    padding-top: 10px;
+}

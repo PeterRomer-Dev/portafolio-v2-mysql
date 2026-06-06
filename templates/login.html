@@ -1,0 +1,83 @@
+<!-- El siguiente código define la estructura de la página de login  -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Privado</title>
+    <style>
+
+        body { 
+            background-color: #121212; 
+            color: white; 
+            font-family: 'Poppins', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        
+        .login-card { 
+            background: #1e1e1e; 
+            padding: 40px; 
+            border-radius: 15px; 
+            border: 1px solid #D4AF37; 
+            text-align: center; 
+            width: 100%; 
+            max-width: 400px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 20px 0; 
+            background: #2a2a2a; 
+            border: 1px solid #333; 
+            color: white; 
+            border-radius: 5px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+        }
+
+        .btn-entrar { 
+            background: #D4AF37; 
+            color: black; 
+            border: none; 
+            padding: 12px 25px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            border-radius: 5px; 
+            width: 100%; 
+            transition: 0.3s;
+        }
+        
+        .btn-entrar:hover {
+            background: #b38728;
+        }
+
+        
+        @media (max-width: 400px) {
+            .login-card {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!--  Tarjeta de login con formulario de acceso -->
+     <div class="login-card">
+        <h3>🔒 Área Restringida</h3>
+        <form action="/verificar" method="POST"> 
+            
+            <input type="password" name="password" placeholder="Introduce la clave de acceso" required>
+            <button type="submit" class="btn-entrar">Entrar</button>
+        </form>
+        
+        <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+        <a href="/" style="color: #D4AF37; text-decoration: none; font-size: 0.9rem;">← Volver al Portafolio</a>
+    </div>
+</body>
+</html>
