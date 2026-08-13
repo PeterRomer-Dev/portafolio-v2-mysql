@@ -4,11 +4,13 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from sqlalchemy import text
 import pymysql
-# MODIFICACIÓN: Importar load_dotenv para leer las variables del archivo .env local
-from dotenv import load_dotenv
 
-# MODIFICACIÓN: Cargar el archivo .env si existe en el entorno local
-load_dotenv()
+# Cargar .env de forma segura: si no está instalado (como en producción), no detiene la app
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 app = Flask(__name__)
 
