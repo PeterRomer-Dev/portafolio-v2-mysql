@@ -3,17 +3,39 @@ from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from sqlalchemy import text
+import pymysql
 
 app = Flask(__name__)
 
-# --- 1. CONFIGURACIÓN DE CONEXIÓN A MYSQL (DOCKER) ---
-USUARIO_DB = 'root'
-PASSWORD_DB = 'Peter046'
-HOST_DB = 'localhost'  
-NOMBRE_DB = 'sistema'
+# Función o bloque de conexión
+def get_db_connection():
+    return pymysql.connect(
+        host=os.environ.get('DB_HOST'),
+        port=int(os.environ.get('DB_PORT', 3306)),
+        user=os.environ.get('DB_USER'),
+        password=os.environ.get('DB_PASSWORD'),
+        database=os.environ.get('DB_NAME'),
+        ssl={'ssl': {}}  # OBLIGATORIO: Aiven exige conexión SSL cifrada
+    )
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{USUARIO_DB}:{PASSWORD_DB}@{HOST_DB}/{NOMBRE_DB}'
+# Obtener las variables de entorno configuradas en Render
+USUARIO_DB = os.environ.get('DB_USER')
+PASSWORD_DB = os.environ.get('DB_PASSWORD')
+HOST_DB = os.environ.get('DB_HOST')
+PORT_DB = os.environ.get('DB_PORT', '3306')
+NOMBRE_DB = os.environ.get('DB_NAME')
+
+# Cadena de conexión incluyendo el puerto
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{USUARIO_DB}:{PASSWORD_DB}@{HOST_DB}:{PORT_DB}/{NOMBRE_DB}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# OBLIGATORIO PARA AIVEN: Indicar a SQLAlchemy que use SSL
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    "connect_args": {
+        "ssl": {}
+    }
+}
+
 db = SQLAlchemy(app)
 
 # --- 2. MODELO DE LA BASE DE DATOS ---
