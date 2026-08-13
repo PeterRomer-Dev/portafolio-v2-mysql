@@ -18,7 +18,8 @@
 --
 -- Table structure for table `personas`
 --
-
+SET SESSION sql_require_primary_key = 0;
+USE defaultdb;
 DROP TABLE IF EXISTS `personas`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;

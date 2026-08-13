@@ -4,37 +4,44 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from sqlalchemy import text
 import pymysql
+# MODIFICACIÓN: Importar load_dotenv para leer las variables del archivo .env local
+from dotenv import load_dotenv
+
+# MODIFICACIÓN: Cargar el archivo .env si existe en el entorno local
+load_dotenv()
 
 app = Flask(__name__)
 
-# Función o bloque de conexión
+# MODIFICACIÓN: Función de conexión directa ajustada con valores por defecto para entorno local
 def get_db_connection():
     return pymysql.connect(
-        host=os.environ.get('DB_HOST'),
+        host=os.environ.get('DB_HOST', 'localhost'),
         port=int(os.environ.get('DB_PORT', 3306)),
-        user=os.environ.get('DB_USER'),
-        password=os.environ.get('DB_PASSWORD'),
-        database=os.environ.get('DB_NAME'),
-        ssl={'ssl': {}}  # OBLIGATORIO: Aiven exige conexión SSL cifrada
+        user=os.environ.get('DB_USER', 'root'),
+        password=os.environ.get('DB_PASSWORD', ''),
+        database=os.environ.get('DB_NAME', 'tu_bd_local'),
+        # MODIFICACIÓN: En local deshabilitamos SSL si no está presente, en Aiven/Nube se habilita si existe la variable DB_HOST
+        ssl={'ssl': {}} if os.environ.get('DB_HOST') else None
     )
 
-# Obtener las variables de entorno configuradas en Render
-USUARIO_DB = os.environ.get('DB_USER')
-PASSWORD_DB = os.environ.get('DB_PASSWORD')
-HOST_DB = os.environ.get('DB_HOST')
+# MODIFICACIÓN: Obtener variables con valores por defecto (fallbacks) para pruebas en máquina local
+USUARIO_DB = os.environ.get('DB_USER', 'root')
+PASSWORD_DB = os.environ.get('DB_PASSWORD', '')
+HOST_DB = os.environ.get('DB_HOST', 'localhost')
 PORT_DB = os.environ.get('DB_PORT', '3306')
-NOMBRE_DB = os.environ.get('DB_NAME')
+NOMBRE_DB = os.environ.get('DB_NAME', 'tu_bd_local')
 
 # Cadena de conexión incluyendo el puerto
 app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{USUARIO_DB}:{PASSWORD_DB}@{HOST_DB}:{PORT_DB}/{NOMBRE_DB}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# OBLIGATORIO PARA AIVEN: Indicar a SQLAlchemy que use SSL
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    "connect_args": {
-        "ssl": {}
+# MODIFICACIÓN: Habilitar conexión SSL con Aiven únicamente si detecta un HOST remoto diferente a localhost
+if HOST_DB != 'localhost':
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        "connect_args": {
+            "ssl": {}
+        }
     }
-}
 
 db = SQLAlchemy(app)
 
@@ -72,7 +79,6 @@ def guardar():
     correo = request.form['correo']
 
     try:
-        # CORRECCIÓN: Inserción directa con SQL Nativo para evitar conflictos de refresco con el ORM
         query_insert = text("""
             INSERT INTO personas (nombre, cedula, telefono, fecha_nac, correo, fecha_registro) 
             VALUES (:nombre, :cedula, :telefono, :fecha_nac, :correo, :fecha_registro)
@@ -114,7 +120,6 @@ def verificar():
 
     if clave_ingresada == clave_correcta:
         try:
-            # Consulta SQL explícita mapeada por columnas
             query = text("SELECT id, nombre, cedula, telefono, fecha_nac, correo, fecha_registro FROM personas ORDER BY id DESC")
             resultado = db.session.execute(query)
             
@@ -141,4 +146,9 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         
-    app.run(debug=True)
+    # MODIFICACIÓN: Leer el puerto dinámico enviado por Render/Nube (os.environ PORT) o usar el puerto 5000 en local
+    port = int(os.environ.get('PORT', 5000))
+    
+    # MODIFICACIÓN: Configurar host='0.0.0.0' para visibilidad en la nube y desactivar 'debug=True' en producción automáticamente
+    is_debug = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
+    app.run(host='0.0.0.0', port=port, debug=is_debug)
