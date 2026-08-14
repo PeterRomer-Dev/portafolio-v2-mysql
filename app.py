@@ -14,30 +14,29 @@ except ImportError:
 
 app = Flask(__name__)
 
-# MODIFICACIÓN: Función de conexión directa ajustada con valores por defecto para entorno local
-def get_db_connection():
-    return pymysql.connect(
-        host=os.environ.get('DB_HOST', 'localhost'),
-        port=int(os.environ.get('DB_PORT', 3306)),
-        user=os.environ.get('DB_USER', 'root'),
-        password=os.environ.get('DB_PASSWORD', ''),
-        database=os.environ.get('DB_NAME', 'tu_bd_local'),
-        # MODIFICACIÓN: En local deshabilitamos SSL si no está presente, en Aiven/Nube se habilita si existe la variable DB_HOST
-        ssl={'ssl': {}} if os.environ.get('DB_HOST') else None
-    )
-
-# MODIFICACIÓN: Obtener variables con valores por defecto (fallbacks) para pruebas en máquina local
+# MODIFICACIÓN: Asignar 'defaultdb' como fallback para Aiven si no se detecta la variable DB_NAME
 USUARIO_DB = os.environ.get('DB_USER', 'root')
 PASSWORD_DB = os.environ.get('DB_PASSWORD', '')
 HOST_DB = os.environ.get('DB_HOST', 'localhost')
 PORT_DB = os.environ.get('DB_PORT', '3306')
-NOMBRE_DB = os.environ.get('DB_NAME', 'tu_bd_local')
+NOMBRE_DB = os.environ.get('DB_NAME', 'defaultdb')
+
+# MODIFICACIÓN: Conexión directa asegurando que la base de datos sea 'defaultdb' en nube
+def get_db_connection():
+    return pymysql.connect(
+        host=HOST_DB,
+        port=int(PORT_DB),
+        user=USUARIO_DB,
+        password=PASSWORD_DB,
+        database=NOMBRE_DB,
+        ssl={'ssl': {}} if HOST_DB != 'localhost' else None
+    )
 
 # Cadena de conexión incluyendo el puerto
 app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{USUARIO_DB}:{PASSWORD_DB}@{HOST_DB}:{PORT_DB}/{NOMBRE_DB}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# MODIFICACIÓN: Habilitar conexión SSL con Aiven únicamente si detecta un HOST remoto diferente a localhost
+# MODIFICACIÓN: Habilitar SSL únicamente para el host remoto (Aiven)
 if HOST_DB != 'localhost':
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         "connect_args": {
@@ -59,6 +58,13 @@ class Persona(db.Model):
     correo = db.Column(db.String(100))
     fecha_registro = db.Column(db.String(30))
 
+# MODIFICACIÓN: Garantizar la creación automática de tablas en Aiven tanto con Gunicorn como en local
+with app.app_context():
+    try:
+        db.create_all()
+    except Exception as e:
+        print(f"Aviso en la creación de tablas: {e}")
+
 # --- RUTAS PÚBLICAS ---
 
 @app.route('/')
@@ -73,7 +79,6 @@ def registro():
 def guardar():
     ahora = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
 
-    # Recolectamos los datos del formulario
     nombre = request.form['nombre']
     cedula = request.form['cedula']
     telefono = request.form['telefono']
@@ -145,12 +150,6 @@ def verificar():
         return """<div style='text-align:center; color:white; background:#121212; height:100vh; padding-top:20%;'><h2>⚠️ Clave Incorrecta</h2><a href='/login'>Volver</a></div>"""
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        
-    # MODIFICACIÓN: Leer el puerto dinámico enviado por Render/Nube (os.environ PORT) o usar el puerto 5000 en local
     port = int(os.environ.get('PORT', 5000))
-    
-    # MODIFICACIÓN: Configurar host='0.0.0.0' para visibilidad en la nube y desactivar 'debug=True' en producción automáticamente
     is_debug = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
     app.run(host='0.0.0.0', port=port, debug=is_debug)
