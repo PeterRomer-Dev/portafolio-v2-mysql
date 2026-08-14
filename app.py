@@ -5,48 +5,35 @@ from datetime import datetime
 from sqlalchemy import text
 import pymysql
 
-# Cargar .env de forma segura: si no está instalado (como en producción), no detiene la app
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    pass
-
 app = Flask(__name__)
 
-# MODIFICACIÓN: Asignar 'defaultdb' como fallback para Aiven si no se detecta la variable DB_NAME
-USUARIO_DB = os.environ.get('DB_USER', 'root')
-PASSWORD_DB = os.environ.get('DB_PASSWORD', '')
-HOST_DB = os.environ.get('DB_HOST', 'localhost')
-PORT_DB = os.environ.get('DB_PORT', '3306')
-NOMBRE_DB = os.environ.get('DB_NAME', 'defaultdb')
+# --- CONFIGURACIÓN DE CONEXIÓN A LA NUBE (AIVEN / RENDER) ---
 
-# MODIFICACIÓN: Conexión directa asegurando que la base de datos sea 'defaultdb' en nube
-def get_db_connection():
-    return pymysql.connect(
-        host=HOST_DB,
-        port=int(PORT_DB),
-        user=USUARIO_DB,
-        password=PASSWORD_DB,
-        database=NOMBRE_DB,
-        ssl={'ssl': {}} if HOST_DB != 'localhost' else None
-    )
+# Función para obtener las variables de Render limpiando espacios no deseados
+def get_env(key, default=""):
+    val = os.environ.get(key)
+    return val.strip() if val and val.strip() else default
 
-# Cadena de conexión incluyendo el puerto
+USUARIO_DB  = get_env('DB_USER', 'avnadmin')
+PASSWORD_DB = get_env('DB_PASSWORD', '')
+HOST_DB     = get_env('DB_HOST', '')
+PORT_DB     = get_env('DB_PORT', '27406')
+NOMBRE_DB   = get_env('DB_NAME', 'defaultdb')
+
+# Cadena de conexión MySQL con PyMySQL
 app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{USUARIO_DB}:{PASSWORD_DB}@{HOST_DB}:{PORT_DB}/{NOMBRE_DB}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# MODIFICACIÓN: Habilitar SSL únicamente para el host remoto (Aiven)
-if HOST_DB != 'localhost':
-    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-        "connect_args": {
-            "ssl": {}
-        }
+# Habilitar conexión SSL requerida por Aiven
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    "connect_args": {
+        "ssl": {"ssl_mode": "REQUIRED"}
     }
+}
 
 db = SQLAlchemy(app)
 
-# --- 2. MODELO DE LA BASE DE DATOS ---
+# --- MODELO DE LA BASE DE DATOS ---
 class Persona(db.Model):
     __tablename__ = 'personas'
     
@@ -58,7 +45,7 @@ class Persona(db.Model):
     correo = db.Column(db.String(100))
     fecha_registro = db.Column(db.String(30))
 
-# MODIFICACIÓN: Garantizar la creación automática de tablas en Aiven tanto con Gunicorn como en local
+# Crear las tablas automáticamente en Aiven si no existen
 with app.app_context():
     try:
         db.create_all()
@@ -150,6 +137,6 @@ def verificar():
         return """<div style='text-align:center; color:white; background:#121212; height:100vh; padding-top:20%;'><h2>⚠️ Clave Incorrecta</h2><a href='/login'>Volver</a></div>"""
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    is_debug = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
+    port = int(get_env('PORT', '5000'))
+    is_debug = get_env('FLASK_DEBUG', 'False').lower() == 'true'
     app.run(host='0.0.0.0', port=port, debug=is_debug)
